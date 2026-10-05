@@ -103,8 +103,71 @@ function cosineSimilarity(a, b) {
 //   4. sort and take the top K
 // ---------------------------------------------------------------------------
 function getUserBasedRecommendations(activeUserId, topK = 5) {
-    // your implementation here
-    return [];
+    const activeRatings = ratingMatrix[activeUserId];
+
+    // Compare active user with every other user
+    const similarities = [];
+
+    for (let userId = 1; userId <= numUsers; userId++) {
+        if (userId === activeUserId) continue;
+
+        const similarity = cosineSimilarity(
+            activeRatings,
+            ratingMatrix[userId]
+        );
+
+        if (similarity > 0) {
+            similarities.push({
+                userId,
+                similarity
+            });
+        }
+    }
+
+    // Keep the 20 most similar users
+    similarities.sort((a, b) => b.similarity - a.similarity);
+    const neighbors = similarities.slice(0, 20);
+
+    const predictions = [];
+
+    // Evaluate every movie
+    for (let movieId = 1; movieId <= numMovies; movieId++) {
+
+        // Skip movies already rated by active user
+        if (activeRatings[movieId] !== 0) {
+            continue;
+        }
+
+        let weightedSum = 0;
+        let similaritySum = 0;
+
+        for (const neighbor of neighbors) {
+            const rating = ratingMatrix[neighbor.userId][movieId];
+
+            if (rating !== 0) {
+                weightedSum += neighbor.similarity * rating;
+                similaritySum += neighbor.similarity;
+            }
+        }
+
+        if (similaritySum > 0) {
+            const score = weightedSum / similaritySum;
+
+            const movie = movies.find(m => m.id === movieId);
+
+            if (movie) {
+                predictions.push({
+                    title: movie.title,
+                    score
+                });
+            }
+        }
+    }
+
+    // Highest predicted scores first
+    predictions.sort((a, b) => b.score - a.score);
+
+    return predictions.slice(0, topK);
 }
 
 // ---------------------------------------------------------------------------
