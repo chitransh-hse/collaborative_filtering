@@ -322,6 +322,73 @@ function getItemBasedRecommendations(activeUserId, topK = 5) {
     return recommendations;
 }
 
+function predictItemBasedRating(activeUserId, targetMovieId, topK = 20) {
+
+    const userRatings = ratingMatrix[activeUserId];
+
+    const targetMovieRatings = ratingMatrix.map(
+        row => row[targetMovieId]
+    );
+
+    const similarMovies = [];
+
+    for (
+        let movieId = 1;
+        movieId <= numMovies;
+        movieId++
+    ) {
+
+        if (movieId === targetMovieId) continue;
+
+        const rating = userRatings[movieId];
+
+        // User must have rated this movie
+        if (rating === 0) continue;
+
+        const movieRatings = ratingMatrix.map(
+            row => row[movieId]
+        );
+
+        const similarity = cosineSimilarity(
+            targetMovieRatings,
+            movieRatings
+        );
+
+        if (similarity > 0) {
+
+            similarMovies.push({
+                movieId,
+                similarity,
+                rating
+            });
+        }
+    }
+
+    similarMovies.sort(
+        (a, b) => b.similarity - a.similarity
+    );
+
+    const selectedMovies =
+        similarMovies.slice(0, topK);
+
+    let weightedSum = 0;
+    let similaritySum = 0;
+
+    for (const movie of selectedMovies) {
+
+        weightedSum +=
+            movie.similarity * movie.rating;
+
+        similaritySum += movie.similarity;
+    }
+
+    if (similaritySum === 0) {
+        return null;
+    }
+
+    return weightedSum / similaritySum;
+}
+
 // Provided — read the selected user and render both recommendation lists
 function getRecommendations() {
     const selectElement = document.getElementById('user-select');
