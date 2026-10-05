@@ -60,8 +60,33 @@ function populateUserDropdown() {
 // Output: a number in [0, 1].
 // ---------------------------------------------------------------------------
 function cosineSimilarity(a, b) {
-    // your implementation here
-    return 0;
+    let dotProduct = 0;
+    let magnitudeA = 0;
+    let magnitudeB = 0;
+    let commonItems = 0;
+
+    // Use only co-rated items: ignore positions where either vector is 0
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== 0 && b[i] !== 0) {
+            dotProduct += a[i] * b[i];
+            magnitudeA += a[i] * a[i];
+            magnitudeB += b[i] * b[i];
+            commonItems++;
+        }
+    }
+
+    // No co-rated items means no evidence of similarity
+    if (commonItems === 0) {
+        return 0;
+    }
+
+    const denominator = Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB);
+
+    if (denominator === 0) {
+        return 0;
+    }
+
+    return dotProduct / denominator;
 }
 
 // ---------------------------------------------------------------------------
