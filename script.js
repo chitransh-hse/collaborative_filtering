@@ -186,8 +186,76 @@ function getUserBasedRecommendations(activeUserId, topK = 5) {
 //   3. sort and take the top K
 // ---------------------------------------------------------------------------
 function getItemBasedRecommendations(activeUserId, topK = 5) {
-    // your implementation here
-    return [];
+
+    const userRatings = ratingMatrix[activeUserId];
+
+    const recommendationScores = {};
+
+    // Movies that the user already rated highly
+    for (let sourceMovieId = 1; sourceMovieId <= numMovies; sourceMovieId++) {
+
+        const sourceRating = userRatings[sourceMovieId];
+
+        // Only use movies the user liked
+        if (sourceRating < 4) continue;
+
+        const sourceRatings = ratingMatrix.map(
+            row => row[sourceMovieId]
+        );
+
+        // Compare this movie with every other movie
+        for (let movieId = 1; movieId <= numMovies; movieId++) {
+
+            // Do not recommend movies already rated by the user
+            if (userRatings[movieId] !== 0) continue;
+
+            if (movieId === sourceMovieId) continue;
+
+            const movieRatings = ratingMatrix.map(
+                row => row[movieId]
+            );
+
+            const similarity = cosineSimilarity(
+                sourceRatings,
+                movieRatings
+            );
+
+            if (similarity <= 0) continue;
+
+            // Create entry for this candidate movie
+            if (!recommendationScores[movieId]) {
+                recommendationScores[movieId] = {
+                    weightedScore: 0,
+                    similaritySum: 0
+                };
+            }
+
+            // similarity × user's rating
+            recommendationScores[movieId].weightedScore +=
+                similarity * sourceRating;
+
+            recommendationScores[movieId].similaritySum +=
+                similarity;
+        }
+    }
+
+    // Convert scores into recommendation objects
+    const recommendations = Object.entries(recommendationScores)
+        .map(([movieId, data]) => ({
+            movieId: Number(movieId),
+
+            score:
+                data.weightedScore /
+                data.similaritySum
+        }))
+
+        // Highest predicted score first
+        .sort((a, b) => b.score - a.score)
+
+        // Return only requested number
+        .slice(0, topK);
+
+    return recommendations;
 }
 
 // Provided — read the selected user and render both recommendation lists
