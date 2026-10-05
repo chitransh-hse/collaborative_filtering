@@ -172,6 +172,69 @@ function getUserBasedRecommendations(activeUserId, topK = 5) {
     return predictions.slice(0, topK);
 }
 
+function predictUserBasedRating(activeUserId, targetMovieId, topK = 20) {
+    const activeRatings = ratingMatrix[activeUserId];
+    const neighbors = [];
+
+    for (let userId = 1; userId <= numUsers; userId++) {
+
+        if (userId === activeUserId) continue;
+
+        let commonItems = 0;
+
+        for (let movieId = 1; movieId <= numMovies; movieId++) {
+
+            if (
+                activeRatings[movieId] !== 0 &&
+                ratingMatrix[userId][movieId] !== 0
+            ) {
+                commonItems++;
+            }
+        }
+
+        if (commonItems < MIN_COMMON_ITEMS) continue;
+
+        const similarity = cosineSimilarity(
+            activeRatings,
+            ratingMatrix[userId]
+        );
+
+        const rating = ratingMatrix[userId][targetMovieId];
+
+        // Only neighbors who actually rated the target movie
+        if (similarity > 0 && rating !== 0) {
+            neighbors.push({
+                userId,
+                similarity,
+                rating,
+                commonItems
+            });
+        }
+    }
+
+    neighbors.sort(
+        (a, b) => b.similarity - a.similarity
+    );
+
+    const selectedNeighbors = neighbors.slice(0, topK);
+
+    let weightedSum = 0;
+    let similaritySum = 0;
+
+    for (const neighbor of selectedNeighbors) {
+
+        weightedSum +=
+            neighbor.similarity * neighbor.rating;
+
+        similaritySum += neighbor.similarity;
+    }
+
+    if (similaritySum === 0) {
+        return null;
+    }
+
+    return weightedSum / similaritySum;
+}
 // ---------------------------------------------------------------------------
 // TODO (HW3) — Item-Based CF.
 //
