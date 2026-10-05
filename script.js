@@ -172,6 +172,7 @@ function getUserBasedRecommendations(activeUserId, topK = 5) {
     return predictions.slice(0, topK);
 }
 
+const MIN_COMMON_ITEMS = 20;
 function predictUserBasedRating(activeUserId, targetMovieId, topK = 20) {
     const activeRatings = ratingMatrix[activeUserId];
     const neighbors = [];
