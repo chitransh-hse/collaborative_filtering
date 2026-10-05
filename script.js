@@ -65,7 +65,7 @@ function cosineSimilarity(a, b) {
     let magnitudeB = 0;
     let commonItems = 0;
 
-    // Use only co-rated items: ignore positions where either vector is 0
+    // Use only co-rated items
     for (let i = 0; i < a.length; i++) {
         if (a[i] !== 0 && b[i] !== 0) {
             dotProduct += a[i] * b[i];
@@ -75,12 +75,13 @@ function cosineSimilarity(a, b) {
         }
     }
 
-    // No co-rated items means no evidence of similarity
-    if (commonItems === 0) {
+    // Not enough common ratings to establish reliable similarity
+    if (commonItems < 5) {
         return 0;
     }
 
-    const denominator = Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB);
+    const denominator =
+        Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB);
 
     if (denominator === 0) {
         return 0;
@@ -88,7 +89,6 @@ function cosineSimilarity(a, b) {
 
     return dotProduct / denominator;
 }
-
 // ---------------------------------------------------------------------------
 // TODO (HW3) — User-Based CF.
 //
