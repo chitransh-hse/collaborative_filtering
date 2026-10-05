@@ -61,8 +61,8 @@ function parseItemData(text) {
         const id = parseInt(fields[0]);
         const title = fields[1];
 
-        // Extract genres (last 19 fields)
-        const genreValues = fields.slice(5, 24).map(value => parseInt(value));
+        // Extract the 18 MovieLens genre flags (fields 6-23).
+        const genreValues = fields.slice(6, 24).map(value => parseInt(value));
         const genres = genreNames.filter((_, index) => genreValues[index] === 1);
 
         movies.push({ id, title, genres });
@@ -95,9 +95,9 @@ function parseRatingData(text) {
 //   ratingMatrix[userId][movieId] === rating
 // and a missing entry is 0. MovieLens ratings are 1-5, so 0 is unambiguous.
 //
-// If you adopt a different convention (for example mean imputation, which
-// week3/readme.md section 6 allows), document it here and keep
-// cosineSimilarity in script.js consistent with it.
+// Missing ratings remain 0 in the matrix. script.js handles missing values
+// by using only co-rated entries and weighting cosine similarity by the
+// number of common ratings.
 //
 // Store the result in the global variable `ratingMatrix`.
 // ---------------------------------------------------------------------------
