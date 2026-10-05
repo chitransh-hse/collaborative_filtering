@@ -102,5 +102,14 @@ function parseRatingData(text) {
 // Store the result in the global variable `ratingMatrix`.
 // ---------------------------------------------------------------------------
 function buildRatingMatrix() {
-    // your implementation here
+    // Initialize matrix with 0 = movie not rated by the user
+    ratingMatrix = Array.from(
+        { length: numUsers + 1 },
+        () => Array(numMovies + 1).fill(0)
+    );
+
+    // Fill matrix using the MovieLens ratings
+    for (const rating of ratings) {
+        ratingMatrix[rating.userId][rating.itemId] = rating.rating;
+    }
 }
