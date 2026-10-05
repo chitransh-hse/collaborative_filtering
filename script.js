@@ -305,20 +305,22 @@ function getItemBasedRecommendations(activeUserId, topK = 5) {
 
     // Convert scores into recommendation objects
     const recommendations = Object.entries(recommendationScores)
-        .map(([movieId, data]) => ({
-            movieId: Number(movieId),
+    .map(([movieId, data]) => {
+        const movie = movies.find(
+            m => m.id === Number(movieId)
+        );
+
+        return {
+            title: movie ? movie.title : "Unknown movie",
 
             score:
                 data.weightedScore /
                 data.similaritySum
-        }))
-
-        // Highest predicted score first
-        .sort((a, b) => b.score - a.score)
-
-        // Return only requested number
-        .slice(0, topK);
-
+        };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+    
     return recommendations;
 }
 
