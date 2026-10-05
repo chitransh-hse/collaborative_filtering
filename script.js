@@ -389,7 +389,29 @@ function predictItemBasedRating(activeUserId, targetMovieId, topK = 20) {
     return weightedSum / similaritySum;
 }
 
-// fix runtime queue
+function predictRating(activeUserId, targetMovieId) {
+
+    const userBased =
+        predictUserBasedRating(
+            activeUserId,
+            targetMovieId,
+            20
+        );
+
+    const itemBased =
+        predictItemBasedRating(
+            activeUserId,
+            targetMovieId,
+            20
+        );
+
+    return {
+        userId: activeUserId,
+        movieId: targetMovieId,
+        userBasedPrediction: userBased,
+        itemBasedPrediction: itemBased
+    };
+}
 
 // Provided — read the selected user and render both recommendation lists
 function getRecommendations() {
