@@ -128,6 +128,8 @@ function getUserBasedRecommendations(activeUserId, topK = 5) {
     similarities.sort((a, b) => b.similarity - a.similarity);
     const neighbors = similarities.slice(0, 20);
 
+    console.log("Top 20 similar users:", neighbors);
+
     const predictions = [];
 
     // Evaluate every movie
